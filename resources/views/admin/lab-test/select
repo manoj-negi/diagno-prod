@@ -1,0 +1,111 @@
+@extends('layouts.adminCommon')
+
+@section('content')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-3.6.1/jquery.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<div class="container">
+    <div class="row justify-content">
+        <div class="col-md-12 pt-3">
+            <div class="card">
+                <div class="card-body">
+                    <form action="{{ route('lab-test.store') }}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row">
+                            <input type="hidden" value="{{ isset($data) ? $data->id : '' }}" name="id">
+                            <input type="hidden" name="url" value="{{ app('request')->input('url') }}">
+                          
+                            <div class="col-md-6">
+                                <label class="form-label">Test Name<span class="text-danger">*</span></label>
+                                <input type="text" id="test_name" name="test_name" class="form-control" value="{{ old('test_name', $data->package_name ?? '') }}" required />
+                                @error('test_name')
+                                    <span class="validationclass text-danger" style="position: absolute;top: 90px;">{{ $message }}</span>
+                                @enderror
+                            </div>
+                   
+                            <div class="col-md-6">
+                                <label class="form-label">Amount<span class="text-danger">*</span></label>
+                                <input type="number" name="amount" class="form-control" value="{{ old('amount', $data->amount ?? '') }}" required />
+                                @error('amount')
+                                    <div class="text-danger mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            @if(Auth::user()->roles->contains(1))
+                            <div class="col-md-6">
+                                <label class="form-label">Lab<span class="text-danger">*</span></label>
+                                <select name="lab_id" class="form-control" required>
+                                    <option value="1">Diagno Mitra</option>
+                                    @foreach($labs as $item)
+                                    <option value="{{ $item->id }}" {{ isset($data) && $data->lab_id == $item->id ? 'selected' : '' }}>{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('amount')
+                                    <div class="text-danger mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            @endif
+
+                            <div class="form-group col-12 mb-3 {{ $errors->has('description') ? 'has-error' : '' }}">
+                                <label class="form-label" for="description">{{ __('Description') }}</label>
+                                <textarea id="ckeditor" name="description" class="form-control">{{ old('description', isset($data) ? $data->description : '') }}</textarea>
+                                @if($errors->has('description'))
+                                    <p class="help-block">
+                                        {{ $errors->first('description') }}
+                                    </p>
+                                @endif
+                            </div>
+                           
+                            <div class="mt-3 mb-3">
+                                <a href="{{ route('lab-test.index') }}" class="btn btn-warning btn-sm">Back</a>
+                                <button type="submit" value="submit" class="btn btn-primary btn-sm">Submit</button>
+                            </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+       console.log("check")
+        $(".test_name").select2({
+                   placeholder:'select',
+                   allowclear:true,
+        });
+        $("#test_name").select2({
+                ajax:{
+                    url: "{{ route('lab-test.autocomplete') }}",
+                    dataType: "json",
+                    type:"post"
+                    data: {
+                        term: request.term
+                    },
+                    success: function(data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2
+        });
+        console.log('heler');
+        ClassicEditor
+            .create(document.querySelector('#ckeditor'))
+            .catch(error => {
+                console.error(error);
+            });
+    });
+</script>
+@endsection
+
+@push('scripts')
+<script src="{{ mix('js/app.js') }}"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+@endpush
+

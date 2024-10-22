@@ -1,0 +1,92 @@
+<nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+      <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0   d-xl-none ">
+        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+          <i class="bx bx-menu bx-sm"></i>
+        </a>
+      </div>
+      <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+        <!-- Search -->
+        <div class="navbar-nav align-items-center">
+          <div class="nav-item navbar-search-wrapper mb-0">
+          <div class="d-flex"> {{isset ($financial_year) && isset($financialYearData[$financial_year])  ? $financialYearData[$financial_year] : ($financialYearData[$cfYear]  ? $financialYearData[$cfYear]  : '')}}
+          </li>
+          <li class="nav-item navbar-dropdown dropdown-user dropdown">
+            <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" style="padding-top: 0px !important;">
+              <i class='bx bx-pencil'></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" style="min-width: 31rem;left: 0;">
+            
+              <li class="my-3 mx-4">
+                <h6>Change Assessment Year</h6>
+                <form>
+                  <select name="financial_year" class="form-control" id="financial_year">
+                        <option value="2023-24" {{ (isset($financial_year) && $financial_year == '2023-24')?'selected':'' }}>AY : 2024-2025 (01-04-2023 To 31-03-2024)</option>
+                        <option value="2022-23" {{ (isset($financial_year) && $financial_year == '2022-23')?'selected':'' }}>AY : 2023-2024 (01-04-2022 To 31-03-2023)</option>
+                        <option value="2021-22" {{ (isset($financial_year) && $financial_year == '2021-22')?'selected':'' }}>AY : 2023-2024 (01-04-2021 To 31-03-2022)</option>
+                        <option value="2020-21" {{ (isset($financial_year) && $financial_year == '2020-21')?'selected':'' }}>AY : 2023-2024 (01-04-2020 To 31-03-2021)</option>
+                      </select>
+              </form>
+              </li>
+            </ul>
+          </li>
+          </div>
+          </div>
+        </div>
+        <ul class="navbar-nav flex-row align-items-center ms-auto">
+        <li class="nav-item dropdown-style-switcher dropdown me-1 me-xl-0">
+          {{Auth::user()->user_name ?? ''}}
+          </li>
+          <li class="nav-item navbar-dropdown dropdown-user dropdown">
+            <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+              <div class="avatar">
+                <img src="{{url('admin-assets/img/avatar-img.png')}}" alt="" class="w-px-40 h-auto rounded-circle">
+              </div>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <a class="dropdown-item" href="#">
+                  <div class="d-flex">
+                    <div class="flex-shrink-0 me-3">
+                      <div class="avatar">
+                        <img src="{{url('admin-assets/img/avatar-img.png')}}" alt="" class="w-px-40 h-auto rounded-circle">
+                      </div>
+                    </div>
+                    <div class="flex-grow-1">
+                      <span class="fw-medium d-block">{{ (Auth::user()->userName)??'' }} [{{ (Auth::user()->user_type)??'' }}]</span>
+                      <small class="text-muted">{{ (Auth::user()->email)??'' }}</small>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <div class="dropdown-divider"></div>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <i class="bx bx-user me-2"></i>
+                  <span class="align-middle">My Profile</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" target="_blank" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
+                  <i class="bx bx-power-off me-2"></i>
+                  <span class="align-middle">Log Out</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!--/ User -->
+          
+
+        </ul>
+      </div>
+
+      
+      <!-- Search Small Screens -->
+      <div class="navbar-search-wrapper search-input-wrapper d-none">
+        <span class="twitter-typeahead" style="position: relative; display: inline-block;"><input type="text" class="form-control search-input container-xxl border-0 tt-input" placeholder="Search..." aria-label="Search..." autocomplete="off" spellcheck="false" dir="auto" style="position: relative; vertical-align: top;"><pre aria-hidden="true" style="position: absolute; visibility: hidden; white-space: pre; font-family: &quot;Public Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Oxygen, Ubuntu, Cantarell, &quot;Fira Sans&quot;, &quot;Droid Sans&quot;, &quot;Helvetica Neue&quot;, sans-serif; font-size: 15px; font-style: normal; font-variant: normal; font-weight: 400; word-spacing: 0px; letter-spacing: 0px; text-indent: 0px; text-rendering: auto; text-transform: none;"></pre><div class="tt-menu navbar-search-suggestion ps" style="position: absolute; top: 100%; left: 0px; z-index: 100; display: none;"><div class="tt-dataset tt-dataset-pages"></div><div class="tt-dataset tt-dataset-files"></div><div class="tt-dataset tt-dataset-members"></div><div class="ps__rail-x" style="left: 0px; bottom: 0px;"><div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div></div><div class="ps__rail-y" style="top: 0px; right: 0px;"><div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 0px;"></div></div></div></span>
+        <i class="bx bx-x bx-sm search-toggler cursor-pointer"></i>
+      </div>
+      
+      
+  </nav>

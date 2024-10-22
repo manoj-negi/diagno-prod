@@ -1,0 +1,38 @@
+<center>
+<div style="height:200px; text-align:center; vertical-align:middle;background-color:#22B092; width:535px;"><img src="{image}" style="margin-top:10px;" /></div>
+</center>
+
+<center>
+<div style="height:205px;text-align:center;vertical-align:middle;width: 535px;margin-top: 0px;background-color:#F4F4F4;border:light;">
+<div>&nbsp;</div>
+</div>
+</center>
+
+<center>
+<div style="height:150px;text-align:center;vertical-align:middle;width:500px;margin-top: -236px !important;background-color:#FFFFFF;border:light;box-shadow: 0px 4px 35px rgba(173, 196, 201, 0.25);">
+<center>
+<h3 style="text-align:center;">Card</h3>
+</center>
+
+<table cellpadding="1" cellspacing="1" style="width: 50%; margin-left:auto; margin-right:auto;">
+	<tbody style="margin-left:20px;">
+		<tr>
+			<th scope="row" style="text-align:left; width:50%; color:#545454">Member Id</th>
+			<td style="text-align:right;">{member_id}</td>
+		</tr>
+		<tr>
+			<th scope="row" style="text-align:left; width:50%; color:#545454">Group</th>
+			<td style="text-align:right;">{group}</td>
+		</tr>
+		<tr>
+			<th scope="row" style="text-align:left; width:50%; color:#545454">BIN</th>
+			<td style="text-align:right;">{bin}</td>
+		</tr>
+		<tr>
+			<th scope="row" style="text-align:left; width:50%; color:#545454">PCN</th>
+			<td style="text-align:right;">{pcn}</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+</center>
