@@ -18,6 +18,15 @@
             </div>
         </form>
     </div>
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
     @if (session('success'))
         <div class="alert alert-success mt-2">
@@ -34,21 +43,22 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($pincodes as $pincode)
-                <tr>
-                    <td>{{ $pincode->id }}</td>
-                    <td>{{ $pincode->pincode }}</td>
-                    <td>
-                        <a href="{{ route('pincodes.edit', $pincode->id) }}" class="btn btn-warning">Edit</a>
-                        <form action="{{ route('pincodes.destroy', $pincode->id) }}" method="POST" style="display:inline-block;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
+    @foreach ($pincodes as $pincode)
+        <tr>
+            <td>{{ $loop->iteration }}</td> <!-- Serial number -->
+            <td>{{ $pincode->pincode }}</td>
+            <td>
+                <a href="{{ route('pincodes.edit', $pincode->id) }}" class="btn btn-warning">Edit</a>
+                <form action="{{ route('pincodes.destroy', $pincode->id) }}" method="POST" style="display:inline-block;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+    @endforeach
+</tbody>
+
     </table>
 </div>
 

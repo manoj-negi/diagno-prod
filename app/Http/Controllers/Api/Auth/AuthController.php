@@ -371,14 +371,22 @@ private function sendOtpThroughMsg91($mobile_number, $otp)
             })->first();
 
             if (!$user)
+           {
+
+              echo 'one';
                 return ResponseBuilder::error(trans('messages.INVALID_CREDENTIAL'), $this->badRequest);
+           }
 
-            if ($user->otp != $request->otp)
+            if ($user->otp != $request->otp){
+            echo 'two';
+
                 return ResponseBuilder::error(trans('messages.OTP_INVALID'), $this->badRequest);
+            }
+            if ($user->otp_expire < time()){
+            echo 'three';
 
-            if ($user->otp_expire < time())
                 return ResponseBuilder::error(trans('messages.OTP_EXPIRE'), $this->badRequest);
-
+           }
             Auth::login($user);
 
             if (isset($request->fcm_token))

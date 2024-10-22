@@ -165,7 +165,7 @@ class TestRequestController extends Controller
     $result = TestRequest::updateOrCreate(
         ['id' => $request->id],
         [
-            'lab_id' => $userId,
+            'lab_id' => $request->lab_id,
             'patient_name' => $request->patient_name,
             'age' => $request->age,
             'gender' => $request->gender,

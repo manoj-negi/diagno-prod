@@ -18,7 +18,7 @@
                </div>
                <div class="col-sm-4 text-center text-sm-left">
                   <div class="card-body pb-0 px-0 px-md-4">
-                     <img class ="imgdata" src="{{url('img/illustrations/man-with-laptop-light.png')}}"
+                     <img class ="imgdata" src="{{url('Images/170713289965c0c7e3982d8imgpsh_fullsize_anim-removebg-preview-(1).png')}}"
                         class="img-fluid"
                         alt="View Badge User"
                         data-app-dark-img="{{url('illustrations/man-with-laptop-dark.png')}}"

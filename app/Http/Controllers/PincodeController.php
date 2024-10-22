@@ -51,17 +51,31 @@ class PincodeController extends Controller
         return view('admin.pincodes.edit', compact('pincode', 'title' , 'page_name'));
     }
 
-    public function update(Request $request, Pincode $pincode)
+    // public function update(Request $request, Pincode $pincode)
+    // {
+    //     $request->validate([
+    //         'pincode' => 'required|numeric',
+    //     ]);
+
+    //     $pincode->update($request->all());
+
+    //     return redirect()->route('pincodes.index')->with('success', 'Pincode updated successfully.');
+    // }
+    public function update(Request $request, $id)
     {
+        // Validate the pincode before updating
         $request->validate([
-            'pincode' => 'required|numeric',
+            'pincode' => 'required|digits:6', // Ensures it's exactly 6 digits
         ]);
-
-        $pincode->update($request->all());
-
-        return redirect()->route('pincodes.index')->with('success', 'Pincode updated successfully.');
+    
+        // Now, proceed with updating the record after validation
+        $pincode = Pincode::findOrFail($id);
+        $pincode->pincode = $request->input('pincode');
+        $pincode->save();
+    
+        return redirect()->route('pincodes.index')->with('success', 'Pincode updated successfully!');
     }
-
+    
     public function destroy(Pincode $pincode)
     {
         $pincode->delete();
