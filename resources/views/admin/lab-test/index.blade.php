@@ -32,7 +32,7 @@
                                 <div class="col-12 mb-3">
                                     <label for="nameBasic" class="form-label">Select Lab</label>
                                     <select name="lab" class="form-control mr-1" style="color:#697a8d!important;">
-                                        <option value="1">{{ env('APP_NAME', 'DiagnoMitra') }}</option>
+                                        <!-- <option value="1">{{ env('APP_NAME', 'DiagnoMitra') }}</option> -->
                                         @foreach($labs ?? [] as $item)
                                         <option value="{{ $item->id }}">{{ $item->name }}</option>
                                         @endforeach
