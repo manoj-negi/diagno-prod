@@ -164,7 +164,16 @@
                            </tr>
                            @forelse($todayAppointments as $key => $todayAppointment)
                            <tr>
-                              <td><a href="{{url('lab/'.$todayAppointment->hospital->id.'/edit')}}"> {{ isset($todayAppointment->hospital) ? $todayAppointment->hospital->name : '---' }}</a></td>
+                           <td>
+    @if(isset($todayAppointment->hospital))
+        <a href="{{ url('lab/'.$todayAppointment->hospital->id.'/edit') }}">
+            {{ $todayAppointment->hospital->name }}
+        </a>
+    @else
+        ---
+    @endif
+</td>
+
                               <td><a href="{{url('patient/'.$todayAppointment->patient->id)}}">{{ isset($todayAppointment->patient) ? $todayAppointment->patient->name : '---' }}</a></td>
                               <td>{{ ucfirst($todayAppointment->time) ?? '---' }}</td>
                               <td>{{ ucfirst($todayAppointment->date) ?? '---' }}</td>
@@ -188,10 +197,15 @@
         <tr>
             {{-- Lab name --}}
             <td>
-                <a href="{{ url('lab/' . $oldAppointment->hospital->id . '/edit') }}">
-                    {{ isset($oldAppointment->hospital) ? $oldAppointment->hospital->name : '---' }}
-                </a>
-            </td>
+    @if(isset($todayAppointment->hospital))
+        <a href="{{ url('lab/'.$todayAppointment->hospital->id.'/edit') }}">
+            {{ $todayAppointment->hospital->name }}
+        </a>
+    @else
+        ---
+    @endif
+</td>
+
 
             {{-- Patient name --}}
             <td>
@@ -224,7 +238,16 @@
                            </tr>
                            @forelse($upComingAppointments as $key=> $upComingAppointment)
                            <tr>
-                              <td><a href="{{url('lab/'.$oldAppointment->hospital->id.'/edit')}}">{{ isset($upComingAppointment->hospital) ? $upComingAppointment->hospital->name : '---' }}</a></td>
+                           <td>
+    @if(isset($todayAppointment->hospital))
+        <a href="{{ url('lab/'.$todayAppointment->hospital->id.'/edit') }}">
+            {{ $todayAppointment->hospital->name }}
+        </a>
+    @else
+        ---
+    @endif
+</td>
+
                               <td><a href="{{url('patient/'.$upComingAppointment->patient->id)}}">{{ isset($upComingAppointment->patient) ? $upComingAppointment->patient->name : '---' }}</a></td>
                               <td>{{ ucfirst($upComingAppointment->time) ?? '---' }}</td>
                               <td>{{ ucfirst($upComingAppointment->date) ?? '---' }}</td>

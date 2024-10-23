@@ -41,6 +41,7 @@ class HospitalController extends Controller
         if(Auth::user()->roles->contains(1)){
             $data->orderBy('id','desc');
          }
+         
         return Datatables::of($data)
             ->addIndexColumn()
            
@@ -208,6 +209,7 @@ class HospitalController extends Controller
         $data['page_name'] = "List";
         $get['abc'] = User::where('is_hospital',1)->get();
         $asd = HospitalDoctor::all();
+        dd($data);
         return view('admin.hospitals.show', $data,$get)->with('HospitalDoctor', $asd);;
     }
 
