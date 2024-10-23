@@ -15,6 +15,8 @@ use App\Models\Package;
 use App\Models\DeleteAccountRequests;
 use Illuminate\Support\Facades\Auth;
 use App\Imports\Nirmaya;
+use App\Models\LabTestName;
+
 use DB;
 use PDF;
 use DateTime;
@@ -52,42 +54,104 @@ class HomeController extends Controller
         ]);
         return redirect()->back()->with('message', 'Request created successfully!');
      }
-     public function importCsv(Request $request){
-        // die("fvdsbvdskvdsjkvbdsvjkdsbvjkbjk");
-        $request->validate([
-            'file' => 'required|file|mimes:csv,txt',
-            'lab' => 'required' 
-        ]);
+    //  public function importCsv(Request $request){
+    //     // die("fvdsbvdskvdsjkvbdsvjkdsbvjkbjk");
+    //     $request->validate([
+    //         'file' => 'required|file|mimes:csv,txt',
+    //         'lab' => 'required' 
+    //     ]);
 
-        $file = $request->file('file');
-        $csvData = fopen($file, 'r');
-        $firstRow = true;
-        DB::beginTransaction();
+    //     $file = $request->file('file');
+    //     $csvData = fopen($file, 'r');
+    //     $firstRow = true;
+    //     DB::beginTransaction();
 
-        try {
-            while (($row = fgetcsv($csvData)) !== FALSE) {
-                if ($firstRow) {
-                    $firstRow = false;
-                    continue;
-                }
-                $result = LabTest::create([
-                    'package_name' => $row[0] ?? '',
-                    'amount' => $row[1] ?? '',
-                    'lab_id' =>  $request->lab,
-                    'description' => null,
-                    'type'        => 'test',
-                ]);
+    //     try {
+    //         while (($row = fgetcsv($csvData)) !== FALSE) {
+    //             if ($firstRow) {
+    //                 $firstRow = false;
+    //                 continue;
+    //             }
+    //             $result = LabTest::create([
+    //                 'package_name' => $row[0] ?? '',
+    //                 'amount' => $row[1] ?? '',
+    //                 'lab_id' =>  $request->lab,
+    //                 'description' => null,
+    //                 'type'        => 'test',
+    //             ]);
                 
+    //         }
+    //         DB::commit();
+    //         fclose($csvData);
+    //         return redirect()->back()->with('msg', 'CSV file imported successfully.');
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         fclose($csvData);
+    //         return redirect()->back()->with('msg', 'An error occurred during the import process.');
+    //     }
+    //  }
+
+    public function importCsv(Request $request)
+{
+    $request->validate([
+        'file' => 'required|file|mimes:csv,txt',
+        'lab' => 'required'
+    ]);
+
+    $file = $request->file('file');
+    $csvData = fopen($file, 'r');
+    $firstRow = true;
+    DB::beginTransaction();
+
+    try {
+        while (($row = fgetcsv($csvData)) !== FALSE) {
+            if ($firstRow) {
+                // Skip the header row
+                $firstRow = false;
+                continue;
             }
-            DB::commit();
-            fclose($csvData);
-            return redirect()->back()->with('msg', 'CSV file imported successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            fclose($csvData);
-            return redirect()->back()->with('msg', 'An error occurred during the import process.');
+
+            // Assuming the first column is test_name, the second is amount
+            $testName = $row[0] ?? null; // Test name
+            $amount = $row[1] ?? null;   // Amount
+
+            if ($testName && $amount !== null) { // Check for valid test_name and amount
+                // First, update or create the test in labs_tests
+                $test = LabTest::updateOrCreate(
+                    ['test_name' => $testName], // Unique field
+                    [
+                        // Only save additional fields if necessary
+                    ]
+                );
+
+                // Now, create the association in lab_test_name
+                LabTestName::updateOrCreate(
+                    [
+                        'lab_id' => $request->lab,   // Get lab_id from the request
+                        'test_id' => $test->id,       // Use the ID from the labs_tests table
+                    ],
+                    [
+                        'amount' => $amount,          // The amount to associate
+                        'description' => null,        // Set as needed
+                    ]
+                );
+            }
         }
-     }
+
+        DB::commit();
+        fclose($csvData);
+        return redirect()->back()->with('msg', 'CSV file imported successfully.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        fclose($csvData);
+        
+        // Log the exception message for debugging
+        \Log::error('CSV Import Error: ' . $e->getMessage());
+        
+        return redirect()->back()->with('msg', 'An error occurred during the import process.');
+    }
+}
+
      public function importXlsx(Request $request)
 {
     $request->validate([
