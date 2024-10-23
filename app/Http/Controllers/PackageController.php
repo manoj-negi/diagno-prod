@@ -69,7 +69,7 @@ class PackageController extends Controller
         $data['page_name'] = 'List';
 
         // Fetch only packages for Diagnomitra lab (lab_id = 585)
-        $dataPackages = Package::where('lab_id', 585);
+        $dataPackages = Package::where('lab_id', 733);
 
         if (!empty($request->search)) {
             $dataPackages->where('package_name', 'LIKE', '%' . $request->search . '%');

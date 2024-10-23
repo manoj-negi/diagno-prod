@@ -63,7 +63,7 @@ class LabTestController extends Controller
             ->join('labs_tests', 'lab_test_name.test_id', '=', 'labs_tests.id')
             ->join('users', 'lab_test_name.lab_id', '=', 'users.id')
             ->select('lab_test_name.*', 'labs_tests.test_name', 'users.name as lab_name')
-            ->where('lab_test_name.lab_id', 585); // Filter for lab_id 585
+            ->where('lab_test_name.lab_id', 733); // Filter for lab_id 585
     
         // Apply search filter if a search query is provided
         if (!empty($request->search)) {

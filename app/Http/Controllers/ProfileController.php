@@ -61,7 +61,7 @@ class ProfileController extends Controller
     {
         $data['title'] = 'Lab Profile';
         $data['page_name'] = "List";
-        $dataArray = LabProfile::where('lab_id', 585);
+        $dataArray = LabProfile::where('lab_id', 733);
 
         if (!empty($request->search)) {
             $dataArray->where('profile_name', 'LIKE', '%' . $request->search . '%');
@@ -128,7 +128,7 @@ class ProfileController extends Controller
         $data['tests'] = LabTestName::all(); // Fetch all tests, regardless of lab
     
         // Fetch profiles for Diagnomitra lab
-        $data['diagnomitraProfiles'] = LabProfile::where('lab_id', 585)->get();
+        $data['diagnomitraProfiles'] = LabProfile::where('lab_id', 733)->get();
     
         // Fetch subprofiles
         $data['subprofile'] = LabProfile::where('lab_id', 1)->get();
@@ -417,7 +417,7 @@ class ProfileController extends Controller
         // Check if the logged-in user has role_id 4 (Lab Role)
         if (Auth::user()->roles->contains(4)) {
             // Fetch Diagnomitra profiles
-            $categories['diagnomitraProfiles'] = LabProfile::where('lab_id', 585)->get(); // Assuming lab_id 585 is Diagnomitra lab
+            $categories['diagnomitraProfiles'] = LabProfile::where('lab_id', 733)->get(); // Assuming lab_id 585 is Diagnomitra lab
         }
     
         return view('admin.labprofile.create', $categories);
