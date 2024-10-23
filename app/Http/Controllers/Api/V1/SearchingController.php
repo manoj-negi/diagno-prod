@@ -723,10 +723,16 @@ class SearchingController extends Controller
             ]);
     
             // Retrieve labs by searching for packages with the specified 'package_name'
-            $labsPackages = Package::where('package_name', 'LIKE', '%' . $request->package_name . '%')
-                ->with('lab')  // Ensure the lab relationship is loaded
+            // $labsPackages = Package::where('package_name', 'LIKE', '%' . $request->package_name . '%')
+            //     ->with('lab')  // Ensure the lab relationship is loaded
+            //     ->get();
+                $labsPackages = Package::where('package_name', 'LIKE', '%' . $request->package_name . '%')
+                ->whereHas('lab', function ($query) {
+                    $query->where('lab_id', '!=', '733');  // Exclude Diagnomitra lab
+                })
+                // ->whereIn('lab_id', $getLabByPincode) // Filter labs by pincode if provided
+                ->with('lab') // Ensure the lab relationship is loaded
                 ->get();
-    
             // Check if no labs were found for the given package_name
             if ($labsPackages->isEmpty()) {
                 return ResponseBuilder::error('No labs found for the given package name.', $this->badRequest);
