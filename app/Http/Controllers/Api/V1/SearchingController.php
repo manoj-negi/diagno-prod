@@ -705,7 +705,6 @@ class SearchingController extends Controller
             if ($tests->isEmpty()) {
                 return ResponseBuilder::error("No tests found for the provided search keyword", 404);
             }
-    
             // Return success response with fetched tests
             return ResponseBuilder::success($tests, 'Tests fetched successfully');
             
@@ -811,9 +810,12 @@ class SearchingController extends Controller
 
         // Fetch labs that are associated with the profile name
         $LabProfiles = LabProfile::where('profile_name', 'LIKE', '%' . $request->lab_profile_name . '%')
-            // ->whereIn('lab_id', $getLabByPincode) // Filter labs by pincode if provided
-            ->with('lab') // Ensure the lab relationship is loaded
-            ->get();
+        ->whereHas('lab', function ($query) {
+            $query->where('lab_id', '!=', '733');  // Exclude Diagnomitra lab
+        })
+        // ->whereIn('lab_id', $getLabByPincode) // Filter labs by pincode if provided
+        ->with('lab') // Ensure the lab relationship is loaded
+        ->get();
 
         // Map the result to the desired format
         $this->response = $LabProfiles->map(function ($data) {
