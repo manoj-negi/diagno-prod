@@ -579,7 +579,7 @@ class AppointmentController extends Controller
             'name' => 'required',
             'number' => 'required',
             'dob' => 'required',
-            'email' => 'required|unique:users',
+            'email' => 'required',
         ]);
     
         if ($validator->fails()) {

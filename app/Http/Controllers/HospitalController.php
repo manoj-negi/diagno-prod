@@ -167,21 +167,34 @@ class HospitalController extends Controller
         }
         $result->roles()->sync([4]);
     
-        // Handle multiple pincodes
-        if (is_array($request->pincode)) {
-            foreach ($request->pincode as $pincode_id) {
-                LabPincode::updateOrCreate(
-                    ['lab_id' => $result->id, 'pincode_id' => $pincode_id],
-                    ['pincode_id' => $pincode_id]
-                );
-            }
-        } else {
-            // If it's a single pincode, handle it normally
+      // Handle multiple pincodes
+if (is_array($request->pincode)) {
+    foreach ($request->pincode as $pincode_id) {
+        // Check if pincode_id is not null before creating/updating
+        if ($pincode_id !== null) {
             LabPincode::updateOrCreate(
-                ['lab_id' => $result->id],
-                ['pincode_id' => $request->pincode]
+                ['lab_id' => $result->id, 'pincode_id' => $pincode_id],
+                ['pincode_id' => $pincode_id]
             );
+        } else {
+            // Handle the case where pincode_id is null if necessary
+            // For example, you might want to delete an existing record with null pincode_id
+            LabPincode::where('lab_id', $result->id)->whereNull('pincode_id')->delete();
         }
+    }
+} else {
+    // If it's a single pincode, handle it normally
+    if ($request->pincode !== null) {
+        LabPincode::updateOrCreate(
+            ['lab_id' => $result->id],
+            ['pincode_id' => $request->pincode]
+        );
+    } else {
+        // Handle the case where the single pincode is null
+        LabPincode::where('lab_id', $result->id)->whereNull('pincode_id')->delete();
+    }
+}
+
     
         if ($result) {
             $message = $request->id ? 'Updated' : 'Created';
