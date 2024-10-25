@@ -18,7 +18,7 @@ use App\Models\HospitalDoctor;
 use App\Models\PatientReport;
 use App\Models\LabPincode; 
 use App\Models\Pincode; 
-
+use Illuminate\Support\Facades\Session;
 use App\Models\Appointment;
 use App\Models\LabsAvailability;
 use Illuminate\Support\Facades\Hash;
@@ -134,77 +134,229 @@ class HospitalController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        $validate = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'number' => 'required|string|max:15',
-        ]);
+//     public function store(Request $request)
+//     {
+//         $validate = $request->validate([
+//             'name' => 'required|string|max:255',
+//             'email' => 'required|email',
+//             'number' => 'required|string|max:15',
+//         ]);
     
-        $path = 'uploads/hospital/';
-        $documentFile = !empty($request->hospital_logo) ? $this->uploadDocuments($request->hospital_logo, $path) : $request->old_hospital_logo;
+//         $path = 'uploads/hospital/';
+//         $documentFile = !empty($request->hospital_logo) ? $this->uploadDocuments($request->hospital_logo, $path) : $request->old_hospital_logo;
     
-        $result = User::updateOrCreate(
-            ['id' => $request->id],
-            [
-                'name' => $request->name,
-                'email' => $request->email,
-                'number' => $request->number,
-                'hospital_logo' => $documentFile,
-                'address' => $request->address,
-                'home_collection' => $request->home_collection,
-                'postal_code' => $request->postal_code,
-                'gst' => $request->gst,
-                'hospital_category' => $request->hospital_category,
-                'hospital_description' => $request->hospital_description,
-            ]
-        );
+//         $result = User::updateOrCreate(
+//             ['id' => $request->id],
+//             [
+//                 'name' => $request->name,
+//                 'email' => $request->email,
+//                 'number' => $request->number,
+//                 'hospital_logo' => $documentFile,
+//                 'address' => $request->address,
+//                 'home_collection' => $request->home_collection,
+//                 'postal_code' => $request->postal_code,
+//                 'gst' => $request->gst,
+//                 'hospital_category' => $request->hospital_category,
+//                 'hospital_description' => $request->hospital_description,
+//             ]
+//         );
     
-        if (!empty($request->password)) {
-            $result->password = Hash::make($request->password);
-            $result->save();
-        }
-        $result->roles()->sync([4]);
+//         if (!empty($request->password)) {
+//             $result->password = Hash::make($request->password);
+//             $result->save();
+//         }
+//         $result->roles()->sync([4]);
     
-      // Handle multiple pincodes
-if (is_array($request->pincode)) {
-    foreach ($request->pincode as $pincode_id) {
-        // Check if pincode_id is not null before creating/updating
-        if ($pincode_id !== null) {
-            LabPincode::updateOrCreate(
-                ['lab_id' => $result->id, 'pincode_id' => $pincode_id],
-                ['pincode_id' => $pincode_id]
-            );
-        } else {
-            // Handle the case where pincode_id is null if necessary
-            // For example, you might want to delete an existing record with null pincode_id
-            LabPincode::where('lab_id', $result->id)->whereNull('pincode_id')->delete();
+//       // Handle multiple pincodes
+// if (is_array($request->pincode)) {
+//     foreach ($request->pincode as $pincode_id) {
+//         // Check if pincode_id is not null before creating/updating
+//         if ($pincode_id !== null) {
+//             LabPincode::updateOrCreate(
+//                 ['lab_id' => $result->id, 'pincode_id' => $pincode_id],
+//                 ['pincode_id' => $pincode_id]
+//             );
+//         } else {
+//             // Handle the case where pincode_id is null if necessary
+//             // For example, you might want to delete an existing record with null pincode_id
+//             LabPincode::where('lab_id', $result->id)->whereNull('pincode_id')->delete();
+//         }
+//     }
+// } else {
+//     // If it's a single pincode, handle it normally
+//     if ($request->pincode !== null) {
+//         LabPincode::updateOrCreate(
+//             ['lab_id' => $result->id],
+//             ['pincode_id' => $request->pincode]
+//         );
+//     } else {
+//         // Handle the case where the single pincode is null
+//         LabPincode::where('lab_id', $result->id)->whereNull('pincode_id')->delete();
+//     }
+// }
+
+    
+//         if ($result) {
+//             $message = $request->id ? 'Updated' : 'Created';
+//             return redirect()->route('lab.index')->with('msg', "Lab is Successfully $message");
+//         } else {
+//             return redirect()->back()->with('error', 'Something went wrong. Please try again!');
+//         }
+//     }
+    
+public function store(Request $request)
+{
+
+
+    $request->validate([
+        'csv_file' => 'required|file|mimes:csv,txt',
+    ]);
+
+    // Read the CSV file
+    $path = $request->file('csv_file')->getRealPath();
+    $data = array_map('str_getcsv', file($path));
+
+    $pincodes = [];
+    foreach ($data as $row) {
+        if (isset($row[0])) {
+            $pincode = trim($row[0]);
+
+            // Store the Pincode record or retrieve existing one
+            $pincodeRecord = Pincode::firstOrCreate(['pincode' => $pincode]);
+
+            // Store the ID of the pincode in the array
+            $pincodes[] = $pincodeRecord->id;
         }
     }
-} else {
-    // If it's a single pincode, handle it normally
-    if ($request->pincode !== null) {
+
+    // Session::put('imported_pincodes', $pincodes);
+    // dd($pincodes);
+
+    // return redirect()->back()->with('success', 'Pincodes imported successfully.');
+
+
+    $validate = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email',
+        'number' => 'required|string|max:15',
+    ]);
+
+    $path = 'uploads/hospital/';
+    $documentFile = !empty($request->hospital_logo) ? $this->uploadDocuments($request->hospital_logo, $path) : $request->old_hospital_logo;
+
+    $result = User::updateOrCreate(
+        ['id' => $request->id],
+        [
+            'name' => $request->name,
+            'email' => $request->email,
+            'number' => $request->number,
+            'hospital_logo' => $documentFile,
+            'address' => $request->address,
+            'home_collection' => $request->home_collection,
+            'postal_code' => $request->postal_code,
+            'gst' => $request->gst,
+            'hospital_category' => $request->hospital_category,
+            'hospital_description' => $request->hospital_description,
+        ]
+    );
+
+    if (!empty($request->password)) {
+        $result->password = Hash::make($request->password);
+        $result->save();
+    }
+    $result->roles()->sync([4]);
+
+    // Retrieve imported pincodes from session
+    // $importedPincodes = Session::get('imported_pincodes', []);
+
+    // Debug: Check if pincodes are retrieved from session correctly
+    // logger('Pincodes in session:', $importedPincodes);
+
+    // Handle multiple pincodes from form and session
+    // $allPincodes = array_merge($request->pincode ?? [], $importedPincodes);
+
+    $allPincodes = $pincodes;
+
+    foreach ($allPincodes as $pincode_id) {
         LabPincode::updateOrCreate(
-            ['lab_id' => $result->id],
-            ['pincode_id' => $request->pincode]
+            ['lab_id' => $result->id, 'pincode_id' => $pincode_id],
+            ['pincode_id' => $pincode_id]
         );
+    }
+
+    // Clear the session pincodes after saving them
+    // Session::forget('imported_pincodes');
+
+    if ($result) {
+        $message = $request->id ? 'Updated' : 'Created';
+        return redirect()->route('lab.index')->with('msg', "Lab is Successfully $message");
     } else {
-        // Handle the case where the single pincode is null
-        LabPincode::where('lab_id', $result->id)->whereNull('pincode_id')->delete();
+        return redirect()->back()->with('error', 'Something went wrong. Please try again!');
     }
 }
 
+
     
-        if ($result) {
-            $message = $request->id ? 'Updated' : 'Created';
-            return redirect()->route('lab.index')->with('msg', "Lab is Successfully $message");
-        } else {
-            return redirect()->back()->with('error', 'Something went wrong. Please try again!');
+// public function importPincodeCsv(Request $request)
+// {
+//     $request->validate([
+//         'csv_file' => 'required|file|mimes:csv,txt',
+//     ]);
+
+//     $path = $request->file('csv_file')->getRealPath();
+//     $data = array_map('str_getcsv', file($path));
+
+//     $pincodes = [];
+//     foreach ($data as $row) {
+//         if (isset($row[0])) {
+//             $pincode = trim($row[0]);
+//             $pincodeRecord = Pincode::firstOrCreate(['pincode' => $pincode]);
+//             $pincodes[] = $pincodeRecord->id;
+//         }
+//     }
+
+//     Session::put('imported_pincodes', $pincodes);
+
+//     // Debug: Check if pincodes are correctly stored in session
+//     if (Session::has('imported_pincodes')) {
+//         logger('Imported Pincodes:', Session::get('imported_pincodes'));
+//     }
+
+//     return redirect()->back()->with('success', 'Pincodes imported successfully.');
+// }
+
+public function importPincodeCsv(Request $request)
+{
+    // Validate the file input
+    $request->validate([
+        'csv_file' => 'required|file|mimes:csv,txt',
+    ]);
+
+    // Read the CSV file
+    $path = $request->file('csv_file')->getRealPath();
+    $data = array_map('str_getcsv', file($path));
+
+    $pincodes = [];
+    foreach ($data as $row) {
+        if (isset($row[0])) {
+            $pincode = trim($row[0]);
+
+            // Store the Pincode record or retrieve existing one
+            $pincodeRecord = Pincode::firstOrCreate(['pincode' => $pincode]);
+
+            // Store the ID of the pincode in the array
+            $pincodes[] = $pincodeRecord->id;
         }
     }
-    
 
+    Session::put('imported_pincodes', $pincodes);
+    dd($pincodes);
+
+    return redirect()->back()->with('success', 'Pincodes imported successfully.');
+}
+
+
+    
 
     /**
      * Display the specified resource.

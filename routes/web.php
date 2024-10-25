@@ -84,6 +84,7 @@ Route::post('package/update-selection', [PackageController::class, 'updateSelect
 Route::post('/update-profile-selection', [ProfileController::class, 'updateSelection'])->name('profile.updateSelection');
 Route::post('/pincodes/import', [PincodeController::class, 'import'])->name('pincodes.import');
 Route::post('/pincodes/import-csv', [PincodeController::class, 'importPincodeCsv'])->name('import.pincode.csv');
+Route::post('pincodes/imports', [HospitalController::class, 'importPincodeCsv'])->name('pincodes.import');
 
 Route::post('/add-test-to-profile', [ProfileController::class, 'addTestToProfile'])->name('lab-profile.addTestToProfile');
 Route::get('/home', [HomeController::class, 'index'])->name('home');

@@ -91,7 +91,7 @@ class HomeController extends Controller
     //     }
     //  }
 
-    public function importCsv(Request $request)
+    public function (Request $request)
 {
     $request->validate([
         'file' => 'required|file|mimes:csv,txt',
