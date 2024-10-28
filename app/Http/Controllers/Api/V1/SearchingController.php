@@ -666,54 +666,99 @@ class SearchingController extends Controller
     //     }
     // }
     
-    public function searchLab(Request $request)
-    {
-        try {
-            $keyword = $request->keyword;
+    // public function searchLab(Request $request)
+    // {
+    //     try {
+    //         $keyword = $request->keyword;
     
-            // Get labs with role 'Lab'
-            $lab = Role::where('role', 'Lab')->first()->users();
+    //         // Get labs with role 'Lab'
+    //         $lab = Role::where('role', 'Lab')->first()->users();
     
-            /** Data according to pincode */
-            if (!empty($request->pincode)) {
-                // Join with lab_pincode and pincode tables to filter by pincode
-                $lab->join('lab_pincode', 'users.id', '=', 'lab_pincode.lab_id')
-                    ->join('pincode', 'lab_pincode.pincode_id', '=', 'pincode.id')
-                    ->where('pincode.pincode', $request->pincode);
-            }
+    //         /** Data according to pincode */
+    //         if (!empty($request->pincode)) {
+    //             // Join with lab_pincode and pincode tables to filter by pincode
+    //             $lab->join('lab_pincode', 'users.id', '=', 'lab_pincode.lab_id')
+    //                 ->join('pincode', 'lab_pincode.pincode_id', '=', 'pincode.id')
+    //                 ->where('pincode.pincode', $request->pincode);
+    //         }
     
-            // Get lab IDs after filtering by pincode
-            $lab = $lab->pluck('users.id')->toArray();
+    //         // Get lab IDs after filtering by pincode
+    //         $lab = $lab->pluck('users.id')->toArray();
     
-            // Ensure we have lab IDs to search for
-            if (empty($lab)) {
-                return ResponseBuilder::error("No labs found for the provided pincode", 404);
-            }
+    //         // Ensure we have lab IDs to search for
+    //         if (empty($lab)) {
+    //             return ResponseBuilder::error("No labs found for the provided pincode", 404);
+    //         }
     
-            // Process the search keyword (optional)
-            $keyword = Helper::searchShortKeys($keyword);
+    //         // Process the search keyword (optional)
+    //         $keyword = Helper::searchShortKeys($keyword);
     
-            // Fetch tests from labs_tests and lab_test_name based on lab IDs and search keyword
-            $tests = LabTestName::whereIn('lab_test_name.lab_id', $lab)
-                ->join('users', 'lab_test_name.lab_id', '=', 'users.id')  // Join the users table
-                ->join('labs_tests', 'lab_test_name.test_id', '=', 'labs_tests.id') // Join labs_tests to get test_name
-                ->where('labs_tests.test_name', 'LIKE', "%$keyword%") // Use 'test_name' from labs_tests
-                ->select('lab_test_name.*', 'users.name as lab_name', 'labs_tests.test_name') // Select necessary fields
-                ->get();
+    //         // Fetch tests from labs_tests and lab_test_name based on lab IDs and search keyword
+    //         $tests = LabTestName::whereIn('lab_test_name.lab_id', $lab)
+    //             ->join('users', 'lab_test_name.lab_id', '=', 'users.id')  // Join the users table
+    //             ->join('labs_tests', 'lab_test_name.test_id', '=', 'labs_tests.id') // Join labs_tests to get test_name
+    //             ->where('labs_tests.test_name', 'LIKE', "%$keyword%") // Use 'test_name' from labs_tests
+    //             ->select('lab_test_name.*', 'users.name as lab_name', 'labs_tests.test_name') // Select necessary fields
+    //             ->get();
     
-            // Check if any tests were found
-            if ($tests->isEmpty()) {
-                return ResponseBuilder::error("No tests found for the provided search keyword", 404);
-            }
-            // Return success response with fetched tests
-            return ResponseBuilder::success($tests, 'Tests fetched successfully');
+    //         // Check if any tests were found
+    //         if ($tests->isEmpty()) {
+    //             return ResponseBuilder::error("No tests found for the provided search keyword", 404);
+    //         }
+    //         // Return success response with fetched tests
+    //         return ResponseBuilder::success($tests, 'Tests fetched successfully');
             
-        } catch (Exception $e) {
-            // Handle exception with appropriate error message and code
-            return ResponseBuilder::error(__($e->getMessage()), 500);
+    //     } catch (Exception $e) {
+    //         // Handle exception with appropriate error message and code
+    //         return ResponseBuilder::error(__($e->getMessage()), 500);
+    //     }
+    // }
+    public function searchLab(Request $request)
+{
+    try {
+        $keyword = $request->keyword;
+
+        // Check and log the processed keyword
+        \Log::info("Original keyword: $keyword");
+        $keyword = Helper::searchShortKeys($keyword);
+        \Log::info("Processed keyword: $keyword");
+
+        // Get labs with role 'Lab'
+        $lab = Role::where('role', 'Lab')->first()->users();
+
+        // Filter labs by pincode if provided
+        if (!empty($request->pincode)) {
+            $lab->join('lab_pincode', 'users.id', '=', 'lab_pincode.lab_id')
+                ->join('pincode', 'lab_pincode.pincode_id', '=', 'pincode.id')
+                ->where('pincode.pincode', $request->pincode);
         }
+
+        // Get lab IDs after filtering by pincode
+        $lab = $lab->pluck('users.id')->toArray();
+
+        if (empty($lab)) {
+            return ResponseBuilder::error("No labs found for the provided pincode", 404);
+        }
+
+        // Directly search with keyword without further processing
+        $tests = LabTestName::whereIn('lab_test_name.lab_id', $lab)
+            ->join('users', 'lab_test_name.lab_id', '=', 'users.id')
+            ->join('labs_tests', 'lab_test_name.test_id', '=', 'labs_tests.id')
+            ->where('labs_tests.test_name', 'LIKE', "%{$request->keyword}%") // Use raw keyword for testing
+            ->select('lab_test_name.*', 'users.name as lab_name', 'labs_tests.test_name')
+            ->get();
+
+        if ($tests->isEmpty()) {
+            return ResponseBuilder::error("No tests found for the provided search keyword", 404);
+        }
+
+        return ResponseBuilder::success($tests, 'Tests fetched successfully');
+        
+    } catch (Exception $e) {
+        return ResponseBuilder::error(__($e->getMessage()), 500);
     }
-    
+}
+
     public function labsPackage(Request $request)
     {
         try {
