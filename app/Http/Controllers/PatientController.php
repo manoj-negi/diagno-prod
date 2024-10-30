@@ -164,32 +164,57 @@ class PatientController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    // public function show(Request $request, $id)
+    // {
+    //     $result['PatientFamily'] = PatientFamily::where('patient_id',$id)->get();
+    //     $result['PatientReport'] = AppointmentReport::where('patient_id',$id)->get();
+    //     $idArray = Appointment::where('patient_id', $id)->pluck('id')->toArray();
+    //     $result['Patientbill'] = AppointmentBill::whereIn('appointment_id',$idArray)->get();
+    //     $result['prescription'] = UserPrescription::where('user_id',$id)->orderBy('id','desc')->get();
+    //     $result['data'] = User::find($id);
+    //     $result['title'] = "Patient";
+    //     $result['page_name'] = "Profile";
+    //     $records = getenv('ADMIN_PAGE_LIMIT');
+    //     if (isset($_GET['paginate'])) {
+    //         $records = $request->paginate;
+    //     }
+    //     $result['appointments'] = Appointment::where('patient_id', $id)->paginate($records)->withQueryString();
+
+    //     //$result['preset_question_answer'] = PresetQuestionAnswer::with('Questions')->where('patient_id', $id)->get();
+
+    //     $appointment_ids = Appointment::where('patient_id', $id)->pluck('id')->toArray();
+
+    //     // echo json_encode($result); die();
+    //     $result['reports'] = AppointmentReport::whereIn('appointment_id', $appointment_ids)->get();
+    //     $patientFamilies = PatientFamily::where('patient_id',$id)->paginate(10);
+    //     return view('admin.patient.view', $result,compact('patientFamilies'));
+    // }
     public function show(Request $request, $id)
     {
-        $result['PatientFamily'] = PatientFamily::where('patient_id',$id)->get();
-        $result['PatientReport'] = AppointmentReport::where('patient_id',$id)->get();
+        $result['PatientFamily'] = PatientFamily::where('patient_id', $id)->get();
+        $result['PatientReport'] = AppointmentReport::where('patient_id', $id)->get();
         $idArray = Appointment::where('patient_id', $id)->pluck('id')->toArray();
-        $result['Patientbill'] = AppointmentBill::whereIn('appointment_id',$idArray)->get();
-        $result['prescription'] = UserPrescription::where('user_id',$id)->orderBy('id','desc')->get();
+        $result['Patientbill'] = AppointmentBill::whereIn('appointment_id', $idArray)->get();
+        $result['prescription'] = UserPrescription::where('user_id', $id)->orderBy('id', 'desc')->get();
         $result['data'] = User::find($id);
         $result['title'] = "Patient";
         $result['page_name'] = "Profile";
+    
         $records = getenv('ADMIN_PAGE_LIMIT');
         if (isset($_GET['paginate'])) {
             $records = $request->paginate;
         }
+    
         $result['appointments'] = Appointment::where('patient_id', $id)->paginate($records)->withQueryString();
-
-        //$result['preset_question_answer'] = PresetQuestionAnswer::with('Questions')->where('patient_id', $id)->get();
-
-        $appointment_ids = Appointment::where('patient_id', $id)->pluck('id')->toArray();
-
-        // echo json_encode($result); die();
-        $result['reports'] = AppointmentReport::whereIn('appointment_id', $appointment_ids)->get();
-        $patientFamilies = PatientFamily::where('patient_id',$id)->paginate(10);
-        return view('admin.patient.view', $result,compact('patientFamilies'));
+    
+        // Fetch reports by patient_id instead of appointment_id
+        $result['reports'] = AppointmentReport::where('patient_id', $id)->get();
+    
+        $patientFamilies = PatientFamily::where('patient_id', $id)->paginate(10);
+    
+        return view('admin.patient.view', $result, compact('patientFamilies'));
     }
-
+    
     /**
      * Show the form for editing the specified resource.
      *
