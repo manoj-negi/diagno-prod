@@ -266,7 +266,7 @@ class AuthController extends Controller
 private function sendOtpThroughMsg91($mobile_number, $otp)
 {
     $authkey = "425054Aag3ulsUGD67065ebdP1"; 
-    $template_id = "67065b76d6fc05131e19c933"; 
+    $template_id = "672885acd6fc057400119843"; 
 
     $curl = curl_init();
 

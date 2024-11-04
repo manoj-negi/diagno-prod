@@ -122,7 +122,7 @@
         <!-- <form action="{{ route('pincodes.import') }}" method="POST" enctype="multipart/form-data"> -->
             @csrf
             <div class="input-group">
-                <input type="file" name="csv_file" id="csv_file" class="form-control" style="display: none;" required>
+                <input type="file" name="csv_file" id="csv_file" class="form-control" style="display: none;" >
                 <div class="input-group-append">
                     <button type="button" class="btn btn-success mx-2" id="chooseFileButton">Import CSV</button>
                     <!-- <button type="submit" class="btn btn-primary" style="display:none;" id="submitButton">Submit</button> -->

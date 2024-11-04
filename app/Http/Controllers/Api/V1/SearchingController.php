@@ -773,7 +773,7 @@ class SearchingController extends Controller
             //     ->get();
                 $labsPackages = Package::where('package_name', 'LIKE', '%' . $request->package_name . '%')
                 ->whereHas('lab', function ($query) {
-                    $query->where('lab_id', '!=', '733');  // Exclude Diagnomitra lab
+                    $query->where('lab_id', '!=', '761');  // Exclude Diagnomitra lab
                 })
                 // ->whereIn('lab_id', $getLabByPincode) // Filter labs by pincode if provided
                 ->with('lab') // Ensure the lab relationship is loaded
@@ -862,7 +862,7 @@ class SearchingController extends Controller
         // Fetch labs that are associated with the profile name
         $LabProfiles = LabProfile::where('profile_name', 'LIKE', '%' . $request->lab_profile_name . '%')
         ->whereHas('lab', function ($query) {
-            $query->where('lab_id', '!=', '733');  // Exclude Diagnomitra lab
+            $query->where('lab_id', '!=', '761');  // Exclude Diagnomitra lab
         })
         // ->whereIn('lab_id', $getLabByPincode) // Filter labs by pincode if provided
         ->with('lab') // Ensure the lab relationship is loaded

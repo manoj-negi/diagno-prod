@@ -208,24 +208,29 @@ public function store(Request $request)
 {
 
 
-    $request->validate([
-        'csv_file' => 'required|file|mimes:csv,txt',
-    ]);
-
-    // Read the CSV file
-    $path = $request->file('csv_file')->getRealPath();
-    $data = array_map('str_getcsv', file($path));
-
     $pincodes = [];
-    foreach ($data as $row) {
-        if (isset($row[0])) {
-            $pincode = trim($row[0]);
 
-            // Store the Pincode record or retrieve existing one
-            $pincodeRecord = Pincode::firstOrCreate(['pincode' => $pincode]);
+    // Process the CSV file if it is uploaded
+    if ($request->hasFile('csv_file')) {
+        // Validate the CSV file
+        $request->validate([
+            'csv_file' => 'file|mimes:csv,txt',
+        ]);
 
-            // Store the ID of the pincode in the array
-            $pincodes[] = $pincodeRecord->id;
+        // Read the CSV file
+        $path = $request->file('csv_file')->getRealPath();
+        $data = array_map('str_getcsv', file($path));
+
+        foreach ($data as $row) {
+            if (isset($row[0])) {
+                $pincode = trim($row[0]);
+
+                // Store the Pincode record or retrieve existing one
+                $pincodeRecord = Pincode::firstOrCreate(['pincode' => $pincode]);
+
+                // Store the ID of the pincode in the array
+                $pincodes[] = $pincodeRecord->id;
+            }
         }
     }
 
