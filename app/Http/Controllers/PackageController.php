@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\LabProfile;
 use App\Models\User;
@@ -278,13 +279,19 @@ class PackageController extends Controller
         ]);
     
         // Handle image upload if provided
+        // if ($request->hasFile('image')) {
+        //     $path = public_path("/uploads/package/");
+        //     $uploadImg = $this->uploadDocuments($request->file('image'), $path);
+        //     $data->image = $uploadImg;
+        //     $data->save();
+        // }
         if ($request->hasFile('image')) {
-            $path = public_path("/uploads/package/");
-            $uploadImg = $this->uploadDocuments($request->file('image'), $path);
-            $data->image = $uploadImg;
+            // Upload the image to the S3 bucket in the "profile" directory
+            $path = $request->file('image')->store('package', 's3');
+            // Get the URL of the uploaded image
+            $data->image = Storage::disk('s3')->url($path);
             $data->save();
         }
-    
         // Manage related records in labs_profile_packages table
         if (isset($request->profile_id)) {
             \App\Models\LabsProfilePackage::where('package_id', $data->id)->delete(); // Clear previous entries
@@ -393,13 +400,19 @@ class PackageController extends Controller
         ]);
 
         // Handle image upload if provided
-        if (isset($request->image)) {
-            $path = public_path("/uploads/package/");
-            $uploadImg = $this->uploadDocuments($request->image, $path);
-            $data->image = $uploadImg;
+        // if (isset($request->image)) {
+        //     $path = public_path("/uploads/package/");
+        //     $uploadImg = $this->uploadDocuments($request->image, $path);
+        //     $data->image = $uploadImg;
+        //     $data->save();
+        // }
+        if ($request->hasFile('image')) {
+            // Upload the image to the S3 bucket in the "profile" directory
+            $path = $request->file('image')->store('package', 's3');
+            // Get the URL of the uploaded image
+            $data->image = Storage::disk('s3')->url($path);
             $data->save();
         }
-
         // Update lab profile packages
         if (isset($request->profile_id)) {
             \App\Models\LabsProfilePackage::where('package_id', $id)->delete();

@@ -14,6 +14,7 @@ use App\Models\AppointmentBill;
 use App\Models\UserPrescription;
 use Illuminate\Support\Facades\Auth;
 use Datatables;
+use Illuminate\Support\Facades\Storage;
 
 
 use Hash;
@@ -138,13 +139,19 @@ class PatientController extends Controller
                 'status' => $request->status,
 
             ]);
-            if ($request->hasFile('profile_image')) {
-                $file = $request->file('profile_image');
-                $imageName = $this->uploadDocuments($file, 'uploads/patient/');
-                $result->profile_image = $imageName; 
-                $result->save(); 
+            // if ($request->hasFile('profile_image')) {
+            //     $file = $request->file('profile_image');
+            //     $imageName = $this->uploadDocuments($file, 'uploads/patient/');
+            //     $result->profile_image = $imageName; 
+            //     $result->save(); 
+            // }
+            if ($request->hasFile('image')) {
+                // Upload the image to the S3 bucket in the "profile" directory
+                $path = $request->file('image')->store('patient', 's3');
+                // Get the URL of the uploaded image
+                $data->image = Storage::disk('s3')->url($path);
+                $data->save();
             }
-
 
         $result->roles()->sync(2);
         if ($result) {

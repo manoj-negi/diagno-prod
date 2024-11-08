@@ -81,15 +81,27 @@ class PatientReportController extends Controller
      */
     public function store(Request $request)
     {    
-        $request->validate([
-            'report_image'       => 'mimes:jpg,jpeg,png',
-        ]);
+        // $request->validate([
+        //     'report_image'       => 'mimes:jpg,jpeg,png',
+        // ]);
 
-        $path = 'uploads/patientreport';
-        $documentFile = !empty($request->report_image)
-            ? $this->uploadDocuments($request->report_image, $path)
-            : $request->old_report_image;
+        // $path = 'uploads/patientreport';
+        // $documentFile = !empty($request->report_image)
+        //     ? $this->uploadDocuments($request->report_image, $path)
+        //     : $request->old_report_image;
        
+        $request->validate([
+            'report_image' => 'mimes:jpg,jpeg,png',
+        ]);
+    
+        $documentFile = $request->old_report_image; // Default to old image
+    
+        // Check if a new image is uploaded
+        if ($request->hasFile('report_image')) {
+            // Upload the new image to S3 and get the URL
+            $s3Path = $request->file('report_image')->store('patientreport', 's3');
+            $documentFile = Storage::disk('s3')->url($s3Path);
+        }
         AppointmentReport::updateOrCreate([
             'id'  => $request->id,
         ],[

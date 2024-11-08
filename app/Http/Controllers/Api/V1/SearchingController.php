@@ -285,7 +285,11 @@ class SearchingController extends Controller
         $UserAddresses = UserPrescription::where('user_id',Auth::user()->id)->orderBy('id','desc')->get()->map(function($data){
             return [
                 'id' => $data->id,
-                'prescription_file' => !empty($data->prescription_file) ? url('uploads/pre',$data->prescription_file) : '',
+                // 'prescription_file' => !empty($data->prescription_file) ? url('uploads/pre',$data->prescription_file) : '',
+                'prescription_file' => !empty($data->prescription_file) 
+                    ? Storage::disk('s3')->url('pre' . $data->prescription_file) 
+                    : '',
+                'prescription_title' => $data->prescription_title,
                 'prescription_title' => $data->prescription_title,
                 'uploaded_date' => date('d F Y h:i A',strtotime($data->created_at)),
             ];

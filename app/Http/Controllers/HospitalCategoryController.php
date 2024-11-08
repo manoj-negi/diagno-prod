@@ -7,6 +7,7 @@ use App\Models\HospitalCategory;
 use File;
 use Auth;
 use Datatables;
+use Illuminate\Support\Facades\Storage;
 
 class HospitalCategoryController extends Controller
 {
@@ -92,10 +93,17 @@ class HospitalCategoryController extends Controller
                     "description" => $request->description,
                 ]
             );
-            if (isset($request->image)) {
-                $path = public_path("/uploads/testimonial/");
-                $uploadImg = $this->uploadDocuments($request->image, $path);
-                $result->image = $uploadImg;
+            // if (isset($request->image)) {
+            //     $path = public_path("/uploads/testimonial/");
+            //     $uploadImg = $this->uploadDocuments($request->image, $path);
+            //     $result->image = $uploadImg;
+            //     $result->save();
+            // }
+            if ($request->hasFile('image')) {
+                // Upload the image to the S3 bucket in the "profile" directory
+                $path = $request->file('image')->store('testimonial', 's3');
+                // Get the URL of the uploaded image
+                $result->image = Storage::disk('s3')->url($path);
                 $result->save();
             }
             if ($result) {

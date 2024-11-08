@@ -82,20 +82,33 @@ class TestimonialController extends Controller
                 'status' => $request->status
             ]);
 
-            if(isset($request->image)){
+            // if(isset($request->image)){
 
-                $oldimage = $result->image;
-                if ($oldimage != 'user.png') {
-                    if (File::exists(public_path('/uploads/testimonial/' . $oldimage)))
-                    File::delete(public_path('/uploads/testimonial/' . $oldimage));
-                }
+            //     $oldimage = $result->image;
+            //     if ($oldimage != 'user.png') {
+            //         if (File::exists(public_path('/uploads/testimonial/' . $oldimage)))
+            //         File::delete(public_path('/uploads/testimonial/' . $oldimage));
+            //     }
 
-                $path = public_path('/uploads/testimonial/');
-                $uploadImg = $this->uploadDocuments($request->image, $path);
-                $result->image=$uploadImg;
-                $result->save();
-            } 
+            //     $path = public_path('/uploads/testimonial/');
+            //     $uploadImg = $this->uploadDocuments($request->image, $path);
+            //     $result->image=$uploadImg;
+            //     $result->save();
+            // } 
+ // Handle image upload to S3
+ if ($request->hasFile('image')) {
+    $oldImage = $result->image;
 
+    // Delete the old image from S3 if it exists and is not the default image
+    if ($oldImage && $oldImage !== 'user.png' && Storage::disk('s3')->exists($oldImage)) {
+        Storage::disk('s3')->delete($oldImage);
+    }
+
+    // Upload the new image to S3
+    $path = $request->file('image')->store('testimonial', 's3');
+    $result->image = Storage::disk('s3')->url($path); // Store the public URL
+    $result->save();
+}
             if($result) {
                 if($request->id)
                 {

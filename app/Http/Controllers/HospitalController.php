@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Session;
 use App\Models\Appointment;
 use App\Models\LabsAvailability;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+
 use Datatables;
 class HospitalController extends Controller
 {
@@ -246,9 +248,20 @@ public function store(Request $request)
         'number' => 'required|string|max:15',
     ]);
 
-    $path = 'uploads/hospital/';
-    $documentFile = !empty($request->hospital_logo) ? $this->uploadDocuments($request->hospital_logo, $path) : $request->old_hospital_logo;
+    // $path = 'uploads/hospital/';
+    // $documentFile = !empty($request->hospital_logo) ? $this->uploadDocuments($request->hospital_logo, $path) : $request->old_hospital_logo;
+  // Handle hospital_logo file upload to S3
+  $documentFile = $request->old_hospital_logo; // Default to the existing logo
+  if ($request->hasFile('hospital_logo')) {
+      // Delete the old file from S3 if it exists
+      if ($documentFile && Storage::disk('s3')->exists($documentFile)) {
+          Storage::disk('s3')->delete($documentFile);
+      }
 
+      // Upload the new file to S3
+      $path = $request->file('hospital_logo')->store('hospital', 's3');
+      $documentFile = Storage::disk('s3')->url($path);
+  }
     $result = User::updateOrCreate(
         ['id' => $request->id],
         [

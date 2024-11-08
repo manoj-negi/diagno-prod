@@ -23,6 +23,8 @@ use DB;
 use App\Models\MailTemplate;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+
 class AppointmentController extends Controller
 {
     /**
@@ -288,13 +290,20 @@ class AppointmentController extends Controller
             'report_image' => 'required', 
         ]);
 
+            // if ($request->hasFile('report_image')) {
+            //     $path = 'uploads/appointment';
+            //     $file = $request->file('report_image');
+            //     $appointment = Appointment::findOrFail($request->user_id);
+            //     $appointment->report_image =$this->uploadDocuments($file, $path);
+            //     // return $appointment;
+            //     $appointment->save();
+            // }
             if ($request->hasFile('report_image')) {
-                $path = 'uploads/appointment';
-                $file = $request->file('report_image');
-                $appointment = Appointment::findOrFail($request->user_id);
-                $appointment->report_image =$this->uploadDocuments($file, $path);
-                // return $appointment;
-                $appointment->save();
+                // Upload the image to the S3 bucket in the "profile" directory
+                $path = $request->file('report_image')->store('appointments', 's3');
+                // Get the URL of the uploaded image
+                $data->report_image = Storage::disk('s3')->url($path);
+                $data->save();
             }
             return redirect()->route('appointments.index')->with('msg', 'Report Uploaded Successfully');
     

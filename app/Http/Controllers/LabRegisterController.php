@@ -11,6 +11,7 @@ use App\Models\State;
 use App\Models\City;
 use App\Models\LabCities;
 use Auth;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Support\Facades\Hash;
 
@@ -110,11 +111,21 @@ class LabRegisterController extends Controller
         //     'budget'=>'required',
         //     'location'=>'required',
         // ]);
-        $path = 'uploads/lab-register';
-         $documentFile = !empty($request->hospital_logo)
-             ? $this->uploadDocuments($request->hospital_logo, $path)
-             : $request->old_hospital_logo;
-     
+        // $path = 'uploads/lab-register';
+        //  $documentFile = !empty($request->hospital_logo)
+        //      ? $this->uploadDocuments($request->hospital_logo, $path)
+        //      : $request->old_hospital_logo;
+        $documentFile = $request->old_hospital_logo; // Default to the existing logo
+        if ($request->hasFile('hospital_logo')) {
+            // Delete the old file from S3 if it exists
+            if ($documentFile && Storage::disk('s3')->exists($documentFile)) {
+                Storage::disk('s3')->delete($documentFile);
+            }
+    
+            // Upload the new file to S3
+            $path = $request->file('hospital_logo')->store('lab-register', 's3');
+            $documentFile = Storage::disk('s3')->url($path); // Get the public URL for the new file
+        }
              $user = Auth::user();
              $result = User::updateOrCreate(
                  ['id' => $user->id],

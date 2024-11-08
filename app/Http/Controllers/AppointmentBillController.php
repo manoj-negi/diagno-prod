@@ -116,11 +116,17 @@ class AppointmentBillController extends Controller
         'amount'=>'required|numeric|min:0',
     ]);
 
-    $path = 'uploads/appointmentbill';
-    $documentFile = !empty($request->document_file)
-        ? $this->uploadDocuments($request->document_file, $path)
-        : $request->old_document_file;
-
+    // $path = 'uploads/appointmentbill';
+    // $documentFile = !empty($request->document_file)
+    //     ? $this->uploadDocuments($request->document_file, $path)
+    //     : $request->old_document_file;
+    if ($request->hasFile('image')) {
+        // Upload the image to the S3 bucket in the "profile" directory
+        $path = $request->file('image')->store('appointmentbill', 's3');
+        // Get the URL of the uploaded image
+        $data->image = Storage::disk('s3')->url($path);
+        $data->save();
+    }
     AppointmentBill::updateOrCreate(
         ['id' => $request->id],
         [

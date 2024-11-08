@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use Validator;
 use File;
 use DB;
+use Illuminate\Support\Facades\Storage;
+
 use Illuminate\Support\LazyCollection;
 class PatientController extends Controller
 {
@@ -145,12 +147,19 @@ class PatientController extends Controller
             if ($validator->fails())
                 return \ResponseBuilder::fail($validator->errors()->first(), $this->badRequest);
 
-            if (isset($request->profile_image)) {
+            // if (isset($request->profile_image)) {
 
-                $imagename = $this->uploadDocuments($request->file('profile_image'), public_path('/uploads/profile-imges/'));
-                $oldimage = $user->profile_image;
-                $user->profile_image = $imagename;
-                $user->save();
+            //     $imagename = $this->uploadDocuments($request->file('profile_image'), public_path('/uploads/profile-imges/'));
+            //     $oldimage = $user->profile_image;
+            //     $user->profile_image = $imagename;
+            //     $user->save();
+            if ($request->hasFile('profile_image')) {
+                // Upload the image to the S3 bucket in the "profile" directory
+                $path = $request->file('profile_image')->store('profile-image', 's3');
+                // Get the URL of the uploaded image
+                $data->profile_image = Storage::disk('s3')->url($path);
+                $data->save();
+            
                 if ($oldimage != 'user.png') {
 
                     if (File::exists(public_path('/uploads/profile-imges/' . $oldimage)))

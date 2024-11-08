@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Slider;
 use Illuminate\Http\Request;
 use Validate;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -56,7 +57,14 @@ class SliderController extends Controller
             'image'       => 'mimes:jpg,jpeg,png',
         ]);
 
-        $path = 'uploads/sliders';
+        // $path = 'uploads/sliders';
+        if ($request->hasFile('image')) {
+            // Upload the image to the S3 bucket in the "profile" directory
+            $path = $request->file('image')->store('sliders', 's3');
+            // Get the URL of the uploaded image
+            $data->image = Storage::disk('s3')->url($path);
+            $data->save();
+        }
         Slider::updateOrCreate([
             'id'  => $request->id,
         ],[
@@ -72,6 +80,38 @@ class SliderController extends Controller
                        
     }
 
+
+//     public function store(Request $request)
+// {    
+//     // Validate the image file type
+//     $request->validate([
+//         'image' => 'nullable|mimes:jpg,jpeg,png|max:2048', // Optional validation for max size
+//     ]);
+
+//     $imagePath = $request->old_image; // Default to old image if no new image is uploaded
+
+//     // Check if an image file is uploaded
+//     if ($request->hasFile('image')) {
+//         // Upload the image to the S3 bucket in the "package" directory
+//         $path = $request->file('image')->store('package', 's3');
+
+//         // Get the URL of the uploaded image from S3
+//         $imagePath = Storage::disk('s3')->url($path);
+//     }
+
+//     // Update or create the Slider record with the image URL
+//     Slider::updateOrCreate(
+//         ['id' => $request->id],
+//         [
+//             'title' => $request->title,
+//             'image' => $imagePath, // Store the S3 URL or fallback to old image
+//         ]
+//     );
+
+//     $msg = isset($request->id) && !empty($request->id) ? 'Updated Successfully.' : 'Created Successfully';
+
+//     return redirect()->route('sliders.index')->with('data_created', $msg);
+// }
     /**
      * Display the specified resource.
      *

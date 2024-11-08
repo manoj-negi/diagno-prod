@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\LabProfile;
 use App\Models\LabsTestsProfile;
@@ -187,10 +188,17 @@ class ProfileController extends Controller
         'description' => $request->description,
         'lab_id' => $labID,
     ]);
+    // if ($request->hasFile('image')) {
+    //     $path = public_path("/uploads/profile/");
+    //     $uploadImg = $this->uploadDocuments($request->file('image'), $path);
+    //     $data->image = $uploadImg;
+    //     $data->save();
+    // }
     if ($request->hasFile('image')) {
-        $path = public_path("/uploads/profile/");
-        $uploadImg = $this->uploadDocuments($request->file('image'), $path);
-        $data->image = $uploadImg;
+        // Upload the image to the S3 bucket in the "profile" directory
+        $path = $request->file('image')->store('profile', 's3');
+        // Get the URL of the uploaded image
+        $data->image = Storage::disk('s3')->url($path);
         $data->save();
     }
 // dd($data);

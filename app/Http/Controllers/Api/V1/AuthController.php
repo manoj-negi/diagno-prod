@@ -110,21 +110,33 @@ class AuthController extends Controller
                    'address' => $request->address,
                    'status' => $request->status
                 ]);
-
-                if (isset($request->profile_image)) {
-
-            $oldimage = $user->profile_image;
-            if ($oldimage != 'user.png') {
-
-                if (File::exists(public_path('/uploads/profile-imges/' . $oldimage)))
-                    File::delete(public_path('/uploads/profile-imges/' . $oldimage));
+                if ($request->hasFile('profile_image')) {
+                    $oldImage = $user->profile_image;
+            
+                    // Delete the old image from S3 if it exists and is not the default image
+                    if ($oldImage && $oldImage !== 'user.png' && Storage::disk('s3')->exists($oldImage)) {
+                        Storage::disk('s3')->delete($oldImage);
+                    }
+            
+                    // Upload the new image to S3
+                    $path = $request->file('profile_image')->store('profile-image', 's3');
+                    $user->profile_image = Storage::disk('s3')->url($path); // Store the public URL
+                    $user->save();
                 }
+            //     if (isset($request->profile_image)) {
 
-                $path = public_path('uploads/profile-imges');
-                $uploadImg = $this->uploadDocuments($request->profile_image, $path);
-                $user->profile_image = $uploadImg;
-                $user->save();
-            }
+            // $oldimage = $user->profile_image;
+            // if ($oldimage != 'user.png') {
+
+            //     if (File::exists(public_path('/uploads/profile-imges/' . $oldimage)))
+            //         File::delete(public_path('/uploads/profile-imges/' . $oldimage));
+            //     }
+
+            //     $path = public_path('uploads/profile-imges');
+            //     $uploadImg = $this->uploadDocuments($request->profile_image, $path);
+            //     $user->profile_image = $uploadImg;
+            //     $user->save();
+            // }
                 $user->roles()->sync(2);
             return ResponseBuilder::success($this->response, 'Registered Successfully!');   
         }

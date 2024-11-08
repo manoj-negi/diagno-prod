@@ -598,10 +598,16 @@ class AppointmentController extends Controller
                 'is_profile' => true,
             ];
     
-            if ($request->hasFile('profile_image')) {
-                $data['profile_image'] = $this->uploadDocuments($request->file('profile_image'), $path);
-            }
-    
+            // if ($request->hasFile('profile_image')) {
+            //     $data['profile_image'] = $this->uploadDocuments($request->file('profile_image'), $path);
+            // }
+     if ($request->hasFile('profile_image')) {
+                // Upload the image to the S3 bucket in the "profile" directory
+                $path = $request->file('profile_image')->store('profile-image', 's3');
+                // Get the URL of the uploaded image
+                $data->profile_image = Storage::disk('s3')->url($path);
+                $data->save();
+     }
             $employee = User::updateOrCreate(['id' => $userData->id], $data);
     
             return ResponseBuilder::successMessage('Patient Profile Updated Successfully!', $this->success);

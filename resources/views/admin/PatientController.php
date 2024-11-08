@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\PresetQuestionAnswer;
 use Illuminate\Http\Request;
@@ -119,21 +120,39 @@ class PatientController extends Controller
             ]);
       
 
-        if (isset($request->profile_image)) {
+        // if (isset($request->profile_image)) {
 
-            $oldimage = $result->profile_image;
-            if ($oldimage != 'user.png') {
+        //     $oldimage = $result->profile_image;
+        //     if ($oldimage != 'user.png') {
 
-                if (File::exists(public_path('/uploads/profile-imges/' . $oldimage)))
-                    File::delete(public_path('/uploads/profile-imges/' . $oldimage));
-            }
+        //         if (File::exists(public_path('/uploads/profile-imges/' . $oldimage)))
+        //             File::delete(public_path('/uploads/profile-imges/' . $oldimage));
+        //     }
 
-            $path = public_path('uploads/profile-imges');
-            $uploadImg = $this->uploadDocuments($request->profile_image, $path);
-            $result->profile_image = $uploadImg;
-            $result->save();
-        }
+        //     // $path = public_path('uploads/profile-imges');
+        //     // $uploadImg = $this->uploadDocuments($request->profile_image, $path);
+        //     // $result->profile_image = $uploadImg;
+        //     // $result->save();
+        //     if ($request->hasFile('profile_image')) {
+        //         // Upload the image to the S3 bucket in the "profile" directory
+        //         $path = $request->file('profile_image')->store('profile-image', 's3');
+        //         // Get the URL of the uploaded image
+        //         $data->profile_image = Storage::disk('s3')->url($path);
+        //         $data->save();
+        //     }
+        // }
+   // Handle profile image upload if exists
+   if ($request->hasFile('profile_image')) {
+    $oldImage = $result->profile_image;
+    if ($oldImage != 'user.png' && File::exists(public_path('/uploads/profile-image/' . $oldImage))) {
+        File::delete(public_path('/uploads/profile-image/' . $oldImage));
+    }
 
+    // Upload new profile image to S3
+    $path = $request->file('profile_image')->store('profile-image', 's3');
+    $result->profile_image = Storage::disk('s3')->url($path);
+    $result->save();
+}
         $result->roles()->sync(2);
         if ($result) {
             if ($request->id) {
