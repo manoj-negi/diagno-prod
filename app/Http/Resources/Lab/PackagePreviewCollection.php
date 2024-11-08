@@ -19,7 +19,7 @@ class PackagePreviewCollection extends ResourceCollection
                 "id"                => $data->id ?? '',
                 "package_name"      => $data->package_name ?? '',            
                 "amount"            => !empty($data->amount) ? $data->amount : '',            
-                "image"             => !empty($data->image) ? url('uploads/package',$data->image) : '',            
+                "image"             => !empty($data->image) ? url($data->image) : '',            
             ];
         });
     }

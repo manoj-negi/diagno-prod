@@ -19,7 +19,7 @@ class ProfilePreviewCollection extends ResourceCollection
                 "id"                => $data->id ?? '',
                 "package_name"      => $data->profile_name ?? '',            
                 "amount"            => !empty($data->amount) ? $data->amount : '',            
-                "image"             => !empty($data->image) ? url('uploads/profile',$data->image) : '',            
+                "image"             => !empty($data->image) ? url($data->image) : '',            
             ];
         });
     }
